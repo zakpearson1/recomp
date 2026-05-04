@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Recomp">
+<meta name="theme-color" content="#0F1419">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230F1419'/%3E%3Ctext x='90' y='118' font-family='-apple-system' font-size='90' font-weight='700' fill='%23F97316' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<title>Recomp · 12 Weeks</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0F1419;
+  --surface:#1A1F26;
+  --surface-2:#252B33;
+  --border:#2D343D;
+  --text:#F5F5F0;
+  --text-2:#9BA3AF;
+  --text-3:#6B7280;
+  --accent:#F97316;
+  --accent-bg:rgba(249,115,22,0.12);
+  --green:#10B981;
+  --green-bg:rgba(16,185,129,0.12);
+  --blue:#3B82F6;
+  --purple:#8B5CF6;
+  --red:#EF4444;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;min-height:100vh;min-height:100dvh}
+body{padding-bottom:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top)}
+
+.container{max-width:680px;margin:0 auto;padding:0 16px 100px}
+
+/* Header */
+header{padding:20px 0 16px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:0.5px solid var(--border);margin-bottom:16px}
+header h1{font-size:22px;font-weight:600;letter-spacing:-0.02em}
+header .sub{font-size:13px;color:var(--text-2);margin-top:2px}
+header .week-badge{background:var(--accent-bg);color:var(--accent);font-size:12px;font-weight:600;padding:6px 10px;border-radius:8px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:10px;margin-bottom:20px}
+.tab{flex:1;padding:10px;border-radius:7px;background:transparent;border:none;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit}
+.tab.active{background:var(--surface-2);color:var(--text)}
+
+/* Phase pills */
+.phase-pills{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.phase-pills::-webkit-scrollbar{display:none}
+.pill{padding:8px 14px;border-radius:999px;background:var(--surface);border:0.5px solid var(--border);color:var(--text-2);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;font-family:inherit}
+.pill.active{background:var(--accent);color:#000;border-color:var(--accent)}
+
+/* Metric cards */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.metric{background:var(--surface);border-radius:10px;padding:12px 10px;text-align:center}
+.metric-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:600}
+.metric-value{font-size:18px;font-weight:600;line-height:1.1}
+.metric-unit{font-size:11px;color:var(--text-2);margin-top:2px}
+
+/* Section title */
+h2{font-size:13px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;margin:24px 0 12px}
+
+/* Day grid (week view) */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.day-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-family:inherit;color:inherit;transition:all 0.15s}
+.day-card:active{transform:scale(0.97)}
+.day-card.rest{opacity:0.5;cursor:default}
+.day-card.today{border-color:var(--accent);background:var(--accent-bg)}
+.day-card.done{border-color:var(--green);background:var(--green-bg)}
+.day-card.selected{background:var(--surface-2);border-color:var(--text-2)}
+.day-name{font-size:10px;color:var(--text-2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.day-num{font-size:18px;font-weight:600;margin:4px 0 2px}
+.day-type{font-size:9px;color:var(--text-3);font-weight:500;line-height:1.2;height:22px;display:flex;align-items:center;justify-content:center}
+.day-card.done .day-num,.day-card.today .day-num{color:var(--accent)}
+.day-card.done .day-num{color:var(--green)}
+
+/* Today / session card */
+.session-card{background:var(--surface);border-radius:14px;padding:18px;margin-bottom:16px}
+.session-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.session-title{font-size:18px;font-weight:600;letter-spacing:-0.01em}
+.session-sub{font-size:12px;color:var(--text-2);margin-top:2px}
+.session-status{font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px;background:var(--surface-2);color:var(--text-2)}
+.session-status.active{background:var(--accent-bg);color:var(--accent)}
+.session-status.done{background:var(--green-bg);color:var(--green)}
+
+/* Exercise rows */
+.ex-row{padding:14px 0;border-bottom:0.5px solid var(--border)}
+.ex-row:last-child{border-bottom:none}
+.ex-row:first-child{padding-top:4px}
+.ex-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px}
+.ex-name{font-size:15px;font-weight:500;flex:1}
+.ex-meta{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.ex-note{font-size:12px;color:var(--text-3);margin-top:4px;line-height:1.4}
+.ex-checkmark{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:all 0.15s;flex-shrink:0}
+.ex-checkmark.done{background:var(--green);border-color:var(--green);color:#fff}
+
+/* Set logger */
+.set-logger{margin-top:14px;background:var(--surface-2);border-radius:10px;padding:12px;display:none}
+.set-logger.open{display:block}
+.set-row{display:grid;grid-template-columns:32px 1fr 1fr 36px;gap:10px;align-items:center;margin-bottom:8px}
+.set-row:last-child{margin-bottom:0}
+.set-label{font-size:12px;color:var(--text-3);font-weight:600;text-align:center}
+.set-input{background:var(--bg);border:0.5px solid var(--border);border-radius:7px;padding:8px;color:var(--text);font-size:14px;font-family:inherit;width:100%;font-variant-numeric:tabular-nums;text-align:center}
+.set-input:focus{outline:none;border-color:var(--accent)}
+.set-input::placeholder{color:var(--text-3)}
+.set-check{width:28px;height:28px;border-radius:6px;background:var(--bg);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:transparent;font-family:inherit}
+.set-check.done{background:var(--green);color:#fff;border-color:var(--green)}
+.set-input-head{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;text-align:center;font-weight:600}
+.complete-btn{width:100%;background:var(--accent);color:#000;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:600;margin-top:14px;cursor:pointer;font-family:inherit}
+.complete-btn.done{background:var(--green-bg);color:var(--green)}
+.complete-btn:active{transform:scale(0.98)}
+
+/* Progress view */
+.progress-card{background:var(--surface);border-radius:12px;padding:16px;margin-bottom:12px}
+.progress-title{font-size:14px;font-weight:600;margin-bottom:12px}
+.progress-bar-bg{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:99px;transition:width 0.3s}
+.progress-stat{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.streak{font-size:32px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+
+/* Plan view */
+.plan-section{background:var(--surface);border-radius:12px;padding:16px;margin-bottom:12px}
+.plan-section h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.plan-section p{font-size:14px;color:var(--text-2);line-height:1.6}
+.plan-section ul{list-style:none;margin-top:8px}
+.plan-section ul li{font-size:14px;color:var(--text-2);padding:6px 0;padding-left:16px;position:relative;line-height:1.5}
+.plan-section ul li:before{content:"";position:absolute;left:0;top:14px;width:5px;height:5px;background:var(--accent);border-radius:50%}
+.plan-section ul li b{color:var(--text);font-weight:600}
+
+/* Meals */
+.meal-row{display:grid;grid-template-columns:60px 1fr 50px;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);font-size:13px;align-items:center}
+.meal-row:last-child{border-bottom:none}
+.meal-time{font-weight:600;color:var(--accent);font-size:11px}
+.meal-name{font-weight:500;font-size:13px}
+.meal-desc{color:var(--text-2);font-size:11px;margin-top:2px;line-height:1.3}
+.meal-pro{font-size:12px;color:var(--text);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+
+/* Setup banner */
+.setup-banner{background:var(--accent-bg);border:0.5px solid var(--accent);border-radius:10px;padding:12px;font-size:13px;color:var(--text);margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.setup-banner.hide{display:none}
+.setup-banner b{color:var(--accent)}
+.setup-close{background:none;border:none;color:var(--text-2);cursor:pointer;font-size:18px;padding:0;font-family:inherit;line-height:1;flex-shrink:0}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:18px 18px 0 0;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;padding:24px 20px 32px}
+.modal h2{font-size:18px;color:var(--text);text-transform:none;letter-spacing:-0.01em;margin:0 0 14px;font-weight:600}
+.modal h3{font-size:14px;color:var(--text);text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin:18px 0 8px;font-weight:600}
+.modal p,.modal li{font-size:14px;color:var(--text-2);line-height:1.6}
+.modal ol{padding-left:20px;margin-top:8px}
+.modal ol li{margin-bottom:8px}
+.modal ol li b{color:var(--text);font-weight:600}
+.modal-close{position:sticky;top:0;float:right;background:var(--surface-2);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;font-family:inherit;line-height:1}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,20,25,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid var(--border);padding:8px 12px env(safe-area-inset-bottom);z-index:50}
+.bottom-nav-inner{max-width:680px;margin:0 auto;display:flex;justify-content:space-around}
+.nav-btn{flex:1;background:none;border:none;color:var(--text-3);font-size:10px;font-weight:600;padding:8px 4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:0.05em}
+.nav-btn.active{color:var(--accent)}
+.nav-icon{font-size:20px;line-height:1}
+
+/* View toggle */
+.view{display:none}
+.view.active{display:block}
+
+/* Empty state */
+.empty{text-align:center;padding:32px 16px;color:var(--text-3);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div id="setup" class="setup-banner">
+  <div style="flex:1">
+    <b>Add to home screen.</b><br>
+    Tap <span style="font-family:-apple-system">⎋</span> Share button, scroll, tap "Add to Home Screen". Opens like an app.
+  </div>
+  <button class="setup-close" onclick="hideSetup()">×</button>
+</div>
+
+<header>
+  <div>
+    <h1>Recomp</h1>
+    <div class="sub" id="header-sub">12-week plan</div>
+  </div>
+  <div class="week-badge" id="week-badge">Week 1</div>
+</header>
+
+<!-- TODAY VIEW -->
+<div id="view-today" class="view active">
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Cals</div><div class="metric-value" id="m-cals">2300</div></div>
+    <div class="metric"><div class="metric-label">Protein</div><div class="metric-value" id="m-pro">160<span class="metric-unit">g</span></div></div>
+    <div class="metric"><div class="metric-label">Steps</div><div class="metric-value" id="m-steps">8k</div></div>
+    <div class="metric"><div class="metric-label">Streak</div><div class="metric-value" id="m-streak">0</div></div>
+  </div>
+
+  <h2>This week</h2>
+  <div class="week-grid" id="week-grid"></div>
+
+  <div id="today-session"></div>
+</div>
+
+<!-- PLAN VIEW -->
+<div id="view-plan" class="view">
+  <h2>Phase</h2>
+  <div class="phase-pills" id="phase-pills">
+    <button class="pill active" data-phase="1">Phase 1 · Wk 1–4</button>
+    <button class="pill" data-phase="2">Phase 2 · Wk 5–8</button>
+    <button class="pill" data-phase="3">Phase 3 · Wk 9–12</button>
+  </div>
+
+  <h2>Sessions</h2>
+  <div id="plan-sessions"></div>
+
+  <h2>Daily macros</h2>
+  <div class="plan-section" id="plan-macros"></div>
+
+  <h2>Sample day · meals</h2>
+  <div class="plan-section" style="padding-top:8px" id="plan-meals"></div>
+
+  <h2>Daily non-negotiables</h2>
+  <div class="plan-section">
+    <ul>
+      <li><b>Hit your protein.</b> Single most important number. Everything else flexes.</li>
+      <li><b>Sleep 8 hours.</b> Phone out the bedroom by 10:30pm.</li>
+      <li><b>10-min APT homework.</b> Couch stretch, 90/90, glute bridge, dead bug, cat-cow.</li>
+      <li><b>Hit your steps.</b> Walking calls count. Walk after dinner.</li>
+      <li><b>Log every set.</b> If it's not tracked, it didn't happen.</li>
+    </ul>
+  </div>
+
+  <h2>Eating out — survival rules</h2>
+  <div class="plan-section">
+    <ul>
+      <li><b>Eat protein first.</b> Always order a clear protein source.</li>
+      <li><b>Skip the bread basket.</b> Free calories you didn't plan for.</li>
+      <li><b>Sauces on the side.</b> Saves 200–400 kcal.</li>
+      <li><b>Pre-eat 20g whey</b> 30 min before going out. Kills cravings.</li>
+      <li><b>Default safe orders:</b> grilled chicken/fish + rice + veg, sushi (no tempura), Greek meze + grilled meats, steak + salad.</li>
+    </ul>
+  </div>
+
+  <h2>When to deviate</h2>
+  <div class="plan-section">
+    <ul>
+      <li><b>Back pain returns:</b> Drop trap-bar, replace with hip thrust + back ext. Don't push through.</li>
+      <li><b>Strength drops 2+ weeks:</b> Under-eating or under-sleeping. Check both.</li>
+      <li><b>Weight stalls 3 weeks:</b> Drop 100 kcal/day OR add 1,000 steps/day. Not both.</li>
+      <li><b>Constantly hungry:</b> More protein + more veg volume. Hunger ≠ low calories.</li>
+      <li><b>Dread going to gym:</b> Take 4 days off. Plan still works — you don't.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PROGRESS VIEW -->
+<div id="view-progress" class="view">
+  <div class="progress-card">
+    <div class="progress-title">12-week progress</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="overall-bar" style="width:0%"></div></div>
+    <div class="progress-stat"><span id="overall-text">0 of 48 sessions</span><span id="overall-pct">0%</span></div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-title">Current streak</div>
+    <div class="streak" id="streak-num">0</div>
+    <div class="progress-stat"><span>Sessions completed in a row</span></div>
+  </div>
+
+  <h2>By phase</h2>
+  <div id="phase-progress"></div>
+
+  <h2>Recent sessions</h2>
+  <div id="recent-sessions"></div>
+</div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="nav-btn active" data-view="today"><div class="nav-icon">●</div>Today</button>
+    <button class="nav-btn" data-view="plan"><div class="nav-icon">▤</div>Plan</button>
+    <button class="nav-btn" data-view="progress"><div class="nav-icon">▲</div>Progress</button>
+  </div>
+</div>
+
+<!-- Session detail modal -->
+<div class="modal-overlay" id="session-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const PHASES = {
+  1:{name:"Foundation",weeks:[1,2,3,4],cals:2300,pro:160,steps:"8k",stepsRaw:8000},
+  2:{name:"Stimulus",weeks:[5,6,7,8],cals:2200,pro:170,steps:"9k",stepsRaw:9000},
+  3:{name:"Drive",weeks:[9,10,11,12],cals:2000,pro:175,steps:"10k",stepsRaw:10000}
+};
+
+const SESSIONS = {
+  1:{
+    push:{title:"Upper Push",sub:"Chest · shoulders · triceps",exercises:[
+      {n:"Incline DB Press",s:4,r:"8–10",rpe:7,note:"Pause briefly at chest"},
+      {n:"Flat Machine Press",s:3,r:"10–12",rpe:8,note:"Stretch the pecs"},
+      {n:"Cable Row (chest-supported)",s:4,r:"10–12",rpe:8,note:"Squeeze 1s at end"},
+      {n:"Lat Pulldown",s:3,r:"10–12",rpe:8,note:"Wide neutral grip"},
+      {n:"DB Lateral Raise",s:4,r:"12–15",rpe:9,note:"Lean slightly forward"},
+      {n:"Cable Tricep Pushdown",s:3,r:"12–15",rpe:9,note:"Drop set on last set"},
+      {n:"Dead Bug",s:3,r:"10/side",rpe:"—",note:"Core bracing pattern"}
+    ]},
+    quad:{title:"Lower · Quad",sub:"Low spinal load",exercises:[
+      {n:"Goblet Squat",s:3,r:"10",rpe:7,note:"Movement prep"},
+      {n:"Hack or SSB Squat",s:4,r:"8–10",rpe:7,note:"Spinal-friendly heavy quad work"},
+      {n:"Walking Lunges (DB)",s:3,r:"10/leg",rpe:8,note:"Knee tracks toes"},
+      {n:"Leg Extension",s:3,r:"12–15",rpe:9,note:"Pause at top"},
+      {n:"Standing Calf Raise",s:4,r:"10–12",rpe:9,note:"Full stretch + 1s pause"},
+      {n:"Hanging Knee Raise",s:3,r:"10–12",rpe:8,note:"No swing, slow eccentric"},
+      {n:"Couch Stretch",s:1,r:"60s/side",rpe:"—",note:"Hip flexor mobility"}
+    ]},
+    pull:{title:"Upper Pull",sub:"Back · biceps · rear delts",exercises:[
+      {n:"Pull-up (assisted ok)",s:4,r:"5–8",rpe:8,note:"Full hang, chin over"},
+      {n:"Single-Arm DB Row",s:4,r:"8–10",rpe:8,note:"Brace torso, no rotation"},
+      {n:"Incline DB Curl",s:3,r:"10–12",rpe:8,note:"Stretch the biceps"},
+      {n:"Face Pull",s:4,r:"12–15",rpe:9,note:"External rotation focus"},
+      {n:"DB Shrug",s:3,r:"12–15",rpe:8,note:"Slow tempo"},
+      {n:"Cable Hammer Curl",s:3,r:"12",rpe:9,note:"Last set rest-pause"},
+      {n:"Pallof Press",s:3,r:"10/side",rpe:"—",note:"Anti-rotation core"}
+    ]},
+    post:{title:"Lower · Posterior",sub:"Hinge progression",exercises:[
+      {n:"Glute Bridge (BB)",s:3,r:"10",rpe:7,note:"Movement prep"},
+      {n:"Trap-Bar Deadlift (HIGH)",s:4,r:"6–8",rpe:7,note:"Hips back, neutral spine"},
+      {n:"DB Romanian Deadlift",s:4,r:"10–12",rpe:8,note:"Slight knee bend"},
+      {n:"Leg Curl",s:3,r:"10–12",rpe:9,note:"Slow eccentric"},
+      {n:"Hip Thrust",s:3,r:"10",rpe:8,note:"Full glute squeeze"},
+      {n:"Seated Calf Raise",s:3,r:"12–15",rpe:9,note:"Pause at stretch"},
+      {n:"Side Plank",s:3,r:"30–45s/side",rpe:"—",note:"QL strength"}
+    ]}
+  },
+  2:{
+    push:{title:"Upper Push",sub:"Heavier · more volume",exercises:[
+      {n:"Incline BB Press",s:4,r:"6–8",rpe:8,note:"Progress load weekly"},
+      {n:"Flat DB Press",s:3,r:"8–10",rpe:8,note:"Stretch at bottom"},
+      {n:"T-Bar or Chest-Supported Row",s:4,r:"8–10",rpe:8,note:"Drive elbows back"},
+      {n:"Lat Pulldown (close-grip)",s:3,r:"10–12",rpe:9,note:"Squeeze lats"},
+      {n:"DB Lateral Raise (myo-rep)",s:1,r:"15+5+5+5",rpe:10,note:"Activation + 3 mini-sets"},
+      {n:"Overhead Tricep Extension",s:3,r:"10–12",rpe:9,note:"Full stretch"},
+      {n:"Hollow Hold",s:3,r:"30s",rpe:"—",note:"Anti-extension core"}
+    ]},
+    quad:{title:"Lower · Quad",sub:"Heavier than Phase 1",exercises:[
+      {n:"Leg Press",s:4,r:"8–10",rpe:8,note:"Heels driven through"},
+      {n:"Hack or SSB Squat",s:4,r:"6–8",rpe:8,note:"Heavier than P1"},
+      {n:"Bulgarian Split Squat (DB)",s:3,r:"8/leg",rpe:9,note:"Front leg does the work"},
+      {n:"Leg Extension (drop set)",s:3,r:"10–12",rpe:10,note:"Last set drop x2"},
+      {n:"Standing Calf Raise",s:4,r:"8–10",rpe:9,note:"Heavier load"},
+      {n:"Cable Crunch",s:3,r:"12",rpe:9,note:"Spine flexion, controlled"},
+      {n:"90/90 Hip Stretch",s:1,r:"60s/side",rpe:"—",note:"Hip mobility"}
+    ]},
+    pull:{title:"Upper Pull",sub:"Strength + back volume",exercises:[
+      {n:"Weighted Pull-up",s:4,r:"5–6",rpe:8,note:"Add weight when 8 reps clean"},
+      {n:"BB Row (Pendlay or Yates)",s:4,r:"6–8",rpe:8,note:"Strict form, no torso whip"},
+      {n:"EZ Bar Curl",s:3,r:"8–10",rpe:9,note:"Last set rest-pause"},
+      {n:"Face Pull",s:4,r:"12–15",rpe:9,note:"Pause on each rep"},
+      {n:"DB Shrug (heavy)",s:3,r:"10",rpe:9,note:"3s hold at top"},
+      {n:"Reverse Pec Deck",s:3,r:"12–15",rpe:9,note:"Rear delt isolation"},
+      {n:"Pallof Press",s:3,r:"12/side",rpe:"—",note:"Slower tempo than P1"}
+    ]},
+    post:{title:"Lower · Posterior",sub:"Hinge under load",exercises:[
+      {n:"Hip Thrust (BB)",s:4,r:"8–10",rpe:8,note:"Top set with 2s pause"},
+      {n:"Trap-Bar Deadlift (LOW)",s:4,r:"5–6",rpe:8,note:"Progress only if back is happy"},
+      {n:"BB Romanian Deadlift",s:3,r:"8",rpe:8,note:"Slight knee bend, hinge"},
+      {n:"Leg Curl",s:4,r:"10–12",rpe:9,note:"Last set drop set"},
+      {n:"Single-Leg Calf Raise",s:3,r:"12/side",rpe:9,note:"Full ROM"},
+      {n:"Reverse Hyper or Back Ext",s:3,r:"12",rpe:8,note:"Hold at top, no overextension"},
+      {n:"Side Plank (loaded)",s:3,r:"45s/side",rpe:"—",note:"QL strength"}
+    ]}
+  },
+  3:{
+    push:{title:"Upper Push",sub:"Peak intensity",exercises:[
+      {n:"Incline BB Press (top + back-off)",s:4,r:"5 + 8x3",rpe:9,note:"Top set heavy, back-offs at 80%"},
+      {n:"Weighted Dip or Flat DB Press",s:4,r:"6–8",rpe:9,note:"Add weight if BW dips easy"},
+      {n:"Cable Row (chest-supported)",s:4,r:"8–10",rpe:9,note:"Final set rest-pause"},
+      {n:"Lat Pulldown",s:3,r:"10–12",rpe:9,note:"Drop set on final"},
+      {n:"DB Lateral Raise",s:4,r:"12",rpe:10,note:"4s eccentric, pause at top"},
+      {n:"Cable Tricep Pushdown",s:3,r:"10–12",rpe:10,note:"Triple drop on last"},
+      {n:"Dead Bug + Hollow Hold",s:3,r:"10/30s",rpe:"—",note:"Anti-extension"}
+    ]},
+    quad:{title:"Lower · Quad",sub:"All-out top sets",exercises:[
+      {n:"SSB or Hack Squat (top set)",s:1,r:"5",rpe:9,note:"Leave 1 rep in tank"},
+      {n:"Hack Squat (back-off)",s:3,r:"8–10",rpe:9,note:"75–80% of top set"},
+      {n:"Walking Lunge",s:3,r:"10/leg",rpe:9,note:"Add weight weekly"},
+      {n:"Leg Extension (drop set)",s:3,r:"10",rpe:10,note:"Triple drop on last"},
+      {n:"Standing Calf Raise (myo)",s:1,r:"12+5+5+5",rpe:10,note:"Activation + 3 minis"},
+      {n:"Cable Crunch + Leg Raise",s:3,r:"10/12",rpe:9,note:"Superset"},
+      {n:"Couch Stretch",s:1,r:"90s/side",rpe:"—",note:"APT homework"}
+    ]},
+    pull:{title:"Upper Pull",sub:"Peak pulling strength",exercises:[
+      {n:"Weighted Pull-up (top)",s:1,r:"AMRAP",rpe:10,note:"Heaviest manageable"},
+      {n:"BB Row",s:4,r:"6",rpe:9,note:"Heavier than P2"},
+      {n:"Single-Arm DB Row",s:3,r:"10",rpe:9,note:"Squeeze 2s at top"},
+      {n:"Incline DB Curl (drop last)",s:3,r:"8–10",rpe:10,note:"Heavy + drop"},
+      {n:"Face Pull + Reverse Fly",s:3,r:"15/12",rpe:9,note:"Superset"},
+      {n:"Cable Hammer Curl (rest-pause)",s:2,r:"10+5+5",rpe:10,note:"Heavy"},
+      {n:"Pallof Press (slow)",s:3,r:"10/side",rpe:"—",note:"Anti-rotation"}
+    ]},
+    post:{title:"Lower · Posterior",sub:"Heaviest hinge of plan",exercises:[
+      {n:"Hip Thrust (top + back-off)",s:4,r:"6 + 10x3",rpe:9,note:"Heavy top, back-offs"},
+      {n:"Trap-Bar Deadlift",s:4,r:"4–5",rpe:9,note:"Heaviest of program — back must be good"},
+      {n:"Single-Leg RDL (DB)",s:3,r:"8/leg",rpe:8,note:"Stability + hamstring"},
+      {n:"Leg Curl (myo-rep)",s:1,r:"12+5+5+5",rpe:10,note:"Activation + minis"},
+      {n:"Seated Calf Raise (drop)",s:3,r:"12",rpe:10,note:"Triple drop last"},
+      {n:"Back Extension (weighted)",s:3,r:"10",rpe:8,note:"No overextension"},
+      {n:"Side Plank + Bird Dog",s:3,r:"30s/8",rpe:"—",note:"Core stability"}
+    ]}
+  }
+};
+
+const MEALS = {
+  1:[
+    {time:"8 AM",name:"Breakfast",desc:"4 eggs + 60g oats + berries",pro:35,cals:620},
+    {time:"12 PM",name:"Lunch",desc:"180g chicken + 230g rice + salad + olive oil",pro:45,cals:700},
+    {time:"4 PM",name:"Pre-workout",desc:"Whey + banana + almonds",pro:30,cals:380},
+    {time:"7:30 PM",name:"Dinner",desc:"200g steak + 350g potatoes + broccoli",pro:55,cals:680}
+  ],
+  2:[
+    {time:"8 AM",name:"Breakfast",desc:"4 eggs + 50g oats + berries",pro:35,cals:550},
+    {time:"12 PM",name:"Lunch",desc:"180g chicken + 200g rice + salad",pro:45,cals:650},
+    {time:"4 PM",name:"Pre-workout",desc:"Whey + banana + almonds",pro:30,cals:350},
+    {time:"7:30 PM",name:"Dinner",desc:"200g salmon + 300g potatoes + broccoli",pro:55,cals:650}
+  ],
+  3:[
+    {time:"8 AM",name:"Breakfast",desc:"3 eggs + 200g Greek yogurt + berries",pro:40,cals:450},
+    {time:"12 PM",name:"Lunch",desc:"200g chicken + 150g rice + salad",pro:50,cals:580},
+    {time:"4 PM",name:"Pre-workout",desc:"Whey + small apple",pro:28,cals:260},
+    {time:"7:30 PM",name:"Dinner",desc:"200g lean beef + 250g potato + greens",pro:55,cals:580}
+  ]
+};
+
+// Tue/Thu/Sat/Sun split, upper-first
+const WEEK_SCHEDULE = [
+  {dayName:"Mon",type:"rest",label:"Rest"},
+  {dayName:"Tue",type:"push",label:"Upper Push"},
+  {dayName:"Wed",type:"rest",label:"Rest"},
+  {dayName:"Thu",type:"quad",label:"Lower Quad"},
+  {dayName:"Fri",type:"rest",label:"Rest"},
+  {dayName:"Sat",type:"pull",label:"Upper Pull"},
+  {dayName:"Sun",type:"post",label:"Lower Post"}
+];
+
+// ============ STATE ============
+let state = JSON.parse(localStorage.getItem('recomp_state') || '{}');
+state.startDate = state.startDate || new Date().toISOString().split('T')[0];
+state.completed = state.completed || {};      // {sessionId: {date, sets: {exIdx: [{w,r}]}}}
+state.currentPhase = state.currentPhase || "1";
+state.setupShown = state.setupShown !== false;
+
+function save(){ localStorage.setItem('recomp_state', JSON.stringify(state)); }
+
+// ============ HELPERS ============
+function getCurrentWeek(){
+  const start = new Date(state.startDate);
+  const today = new Date();
+  const days = Math.floor((today - start) / (1000*60*60*24));
+  return Math.max(1, Math.min(12, Math.floor(days/7) + 1));
+}
+
+function getCurrentPhase(){
+  const week = getCurrentWeek();
+  if(week <= 4) return "1";
+  if(week <= 8) return "2";
+  return "3";
+}
+
+function getTodayDayIdx(){
+  // Mon=0, Sun=6 (matches WEEK_SCHEDULE)
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function getSessionId(weekNum, dayType){
+  return `w${weekNum}-${dayType}`;
+}
+
+function isSessionDone(weekNum, dayType){
+  return !!state.completed[getSessionId(weekNum, dayType)];
+}
+
+function getStreak(){
+  // Count consecutive completed sessions from most recent backwards
+  const week = getCurrentWeek();
+  let streak = 0;
+  let foundAny = false;
+  for(let w = week; w >= 1; w--){
+    for(let i = WEEK_SCHEDULE.length - 1; i >= 0; i--){
+      const day = WEEK_SCHEDULE[i];
+      if(day.type === "rest") continue;
+      if(w === week && i > getTodayDayIdx()) continue; // future
+      if(isSessionDone(w, day.type)){ streak++; foundAny = true; }
+      else if(foundAny){ return streak; }
+    }
+  }
+  return streak;
+}
+
+function getTotalCompleted(){
+  return Object.keys(state.completed).length;
+}
+
+// ============ RENDER ============
+function renderHeader(){
+  const week = getCurrentWeek();
+  const phase = getCurrentPhase();
+  document.getElementById('week-badge').textContent = `Week ${week}`;
+  document.getElementById('header-sub').textContent = `Phase ${phase} · ${PHASES[phase].name}`;
+  const p = PHASES[phase];
+  document.getElementById('m-cals').textContent = p.cals.toLocaleString();
+  document.getElementById('m-pro').innerHTML = `${p.pro}<span class="metric-unit">g</span>`;
+  document.getElementById('m-steps').textContent = p.steps;
+  document.getElementById('m-streak').textContent = getStreak();
+}
+
+function renderWeekGrid(){
+  const grid = document.getElementById('week-grid');
+  const week = getCurrentWeek();
+  const todayIdx = getTodayDayIdx();
+  grid.innerHTML = WEEK_SCHEDULE.map((d, i) => {
+    const done = d.type !== 'rest' && isSessionDone(week, d.type);
+    const isToday = i === todayIdx;
+    const cls = ['day-card'];
+    if(d.type === 'rest') cls.push('rest');
+    if(done) cls.push('done');
+    if(isToday && !done) cls.push('today');
+    const click = d.type === 'rest' ? '' : `onclick="openSessionModal(${week},'${d.type}')"`;
+    return `<button class="${cls.join(' ')}" ${click}>
+      <div class="day-name">${d.dayName}</div>
+      <div class="day-num">${done ? '✓' : (isToday ? '●' : i+1)}</div>
+      <div class="day-type">${d.type === 'rest' ? '' : d.label.split(' ')[1]}</div>
+    </button>`;
+  }).join('');
+}
+
+function renderTodaySession(){
+  const todayIdx = getTodayDayIdx();
+  const day = WEEK_SCHEDULE[todayIdx];
+  const container = document.getElementById('today-session');
+  const week = getCurrentWeek();
+  const phase = getCurrentPhase();
+
+  if(day.type === 'rest'){
+    container.innerHTML = `
+      <h2>Today</h2>
+      <div class="session-card">
+        <div class="session-header">
+          <div>
+            <div class="session-title">Rest day</div>
+            <div class="session-sub">Walk · mobility · recover</div>
+          </div>
+          <div class="session-status">Off</div>
+        </div>
+        <p style="color:var(--text-2);font-size:14px;line-height:1.6">No gym today. Hit your steps (${PHASES[phase].steps}), do the 10-min APT homework, eat protein. Recovery is when you grow.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const session = SESSIONS[phase][day.type];
+  const sessionId = getSessionId(week, day.type);
+  const done = isSessionDone(week, day.type);
+  const completedData = state.completed[sessionId];
+
+  container.innerHTML = `
+    <h2>Today · ${day.dayName}</h2>
+    <div class="session-card">
+      <div class="session-header">
+        <div>
+          <div class="session-title">${session.title}</div>
+          <div class="session-sub">${session.sub}</div>
+        </div>
+        <div class="session-status ${done ? 'done' : 'active'}">${done ? '✓ Done' : 'Active'}</div>
+      </div>
+      ${session.exercises.map((ex, idx) => renderExerciseRow(ex, idx, sessionId, completedData)).join('')}
+      <button class="complete-btn ${done ? 'done' : ''}" onclick="toggleSessionComplete('${sessionId}')">${done ? '✓ Session complete' : 'Mark session complete'}</button>
+    </div>
+  `;
+}
+
+function renderExerciseRow(ex, idx, sessionId, completedData){
+  const exData = (completedData && completedData.sets && completedData.sets[idx]) || [];
+  const allLogged = exData.length > 0 && exData.length >= (typeof ex.s === 'number' ? ex.s : 1);
+  const numSets = typeof ex.s === 'number' ? ex.s : 1;
+
+  let setRows = '';
+  for(let i = 0; i < numSets; i++){
+    const s = exData[i] || {};
+    setRows += `
+      <div class="set-row">
+        <div class="set-label">${i+1}</div>
+        <input type="number" class="set-input" placeholder="kg" inputmode="decimal" value="${s.w||''}" data-sess="${sessionId}" data-ex="${idx}" data-set="${i}" data-field="w">
+        <input type="number" class="set-input" placeholder="reps" inputmode="numeric" value="${s.r||''}" data-sess="${sessionId}" data-ex="${idx}" data-set="${i}" data-field="r">
+        <button class="set-check ${s.done ? 'done' : ''}" onclick="toggleSetDone('${sessionId}',${idx},${i})">✓</button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="ex-row">
+      <div class="ex-head" onclick="toggleExpand('${sessionId}-${idx}')">
+        <div style="flex:1">
+          <div class="ex-name">${ex.n}</div>
+          <div class="ex-note">${ex.note}</div>
+        </div>
+        <div class="ex-meta">${ex.s}×${ex.r}<br><span style="color:var(--text-3)">RPE ${ex.rpe}</span></div>
+        <div class="ex-checkmark ${allLogged ? 'done' : ''}">✓</div>
+      </div>
+      <div class="set-logger" id="logger-${sessionId}-${idx}">
+        <div class="set-row" style="margin-bottom:6px">
+          <div></div>
+          <div class="set-input-head">Weight</div>
+          <div class="set-input-head">Reps</div>
+          <div></div>
+        </div>
+        ${setRows}
+      </div>
+    </div>
+  `;
+}
+
+function renderPlanSessions(){
+  const phase = state.currentPhase;
+  const types = ['push','quad','pull','post'];
+  const dayLabels = {push:'Tue',quad:'Thu',pull:'Sat',post:'Sun'};
+  const container = document.getElementById('plan-sessions');
+  container.innerHTML = types.map(t => {
+    const s = SESSIONS[phase][t];
+    return `
+      <div class="session-card" style="margin-bottom:10px">
+        <div class="session-header">
+          <div>
+            <div class="session-title">${dayLabels[t]} · ${s.title}</div>
+            <div class="session-sub">${s.sub}</div>
+          </div>
+        </div>
+        ${s.exercises.map(ex => `
+          <div class="ex-row">
+            <div class="ex-head">
+              <div style="flex:1">
+                <div class="ex-name">${ex.n}</div>
+                <div class="ex-note">${ex.note}</div>
+              </div>
+              <div class="ex-meta">${ex.s}×${ex.r}<br><span style="color:var(--text-3)">RPE ${ex.rpe}</span></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPlanMacros(){
+  const phase = state.currentPhase;
+  const p = PHASES[phase];
+  const fat = phase === "1" ? 70 : phase === "2" ? 65 : 60;
+  const carbs = phase === "1" ? 250 : phase === "2" ? 230 : 195;
+  document.getElementById('plan-macros').innerHTML = `
+    <ul>
+      <li><b>Calories:</b> ${p.cals.toLocaleString()} kcal</li>
+      <li><b>Protein:</b> ${p.pro}g (~2.2g/kg, the priority)</li>
+      <li><b>Fat:</b> ${fat}g</li>
+      <li><b>Carbs:</b> ${carbs}g (timed around training)</li>
+      <li><b>Steps:</b> ${p.stepsRaw.toLocaleString()}/day</li>
+    </ul>
+  `;
+}
+
+function renderPlanMeals(){
+  const phase = state.currentPhase;
+  const meals = MEALS[phase];
+  const totalP = meals.reduce((a,m) => a + m.pro, 0);
+  const totalC = meals.reduce((a,m) => a + m.cals, 0);
+  document.getElementById('plan-meals').innerHTML =
+    meals.map(m => `
+      <div class="meal-row">
+        <div>
+          <div class="meal-time">${m.time}</div>
+        </div>
+        <div>
+          <div class="meal-name">${m.name}</div>
+          <div class="meal-desc">${m.desc}</div>
+        </div>
+        <div class="meal-pro">${m.pro}g<br><span style="color:var(--text-3);font-weight:400">${m.cals}</span></div>
+      </div>
+    `).join('') +
+    `<div class="meal-row" style="background:var(--surface-2);border-radius:8px;padding:10px;margin-top:8px;border:none">
+      <div><div class="meal-time">Total</div></div>
+      <div><div class="meal-name">Daily target</div></div>
+      <div class="meal-pro">${totalP}g<br><span style="color:var(--text-3);font-weight:400">${totalC.toLocaleString()}</span></div>
+    </div>`;
+}
+
+function renderProgress(){
+  const total = getTotalCompleted();
+  const max = 48; // 4 sessions × 12 weeks
+  const pct = Math.round((total/max)*100);
+  document.getElementById('overall-bar').style.width = pct + '%';
+  document.getElementById('overall-text').textContent = `${total} of ${max} sessions`;
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('streak-num').textContent = getStreak();
+
+  // Phase progress
+  const pp = document.getElementById('phase-progress');
+  pp.innerHTML = ['1','2','3'].map(p => {
+    const phaseSessions = Object.keys(state.completed).filter(id => {
+      const wk = parseInt(id.match(/w(\d+)/)[1]);
+      if(p === '1') return wk <= 4;
+      if(p === '2') return wk > 4 && wk <= 8;
+      return wk > 8;
+    }).length;
+    const phasePct = Math.round((phaseSessions/16)*100);
+    return `
+      <div class="progress-card">
+        <div class="progress-title">Phase ${p} · ${PHASES[p].name}</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${phasePct}%"></div></div>
+        <div class="progress-stat"><span>${phaseSessions} of 16 sessions</span><span>${phasePct}%</span></div>
+      </div>
+    `;
+  }).join('');
+
+  // Recent sessions
+  const recentEl = document.getElementById('recent-sessions');
+  const sessions = Object.entries(state.completed)
+    .sort((a,b) => new Date(b[1].date) - new Date(a[1].date))
+    .slice(0, 8);
+  if(sessions.length === 0){
+    recentEl.innerHTML = '<div class="empty">No sessions logged yet. Hit "Mark session complete" after your first workout.</div>';
+  } else {
+    recentEl.innerHTML = sessions.map(([id, data]) => {
+      const m = id.match(/w(\d+)-(\w+)/);
+      const wk = m[1], type = m[2];
+      const labels = {push:'Upper Push',quad:'Lower Quad',pull:'Upper Pull',post:'Lower Post'};
+      const date = new Date(data.date).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+      return `
+        <div class="progress-card" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px">
+          <div>
+            <div style="font-size:14px;font-weight:500">${labels[type]}</div>
+            <div style="font-size:12px;color:var(--text-2)">Week ${wk} · ${date}</div>
+          </div>
+          <div style="color:var(--green);font-size:18px">✓</div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// ============ INTERACTIONS ============
+function toggleExpand(id){
+  document.getElementById('logger-' + id).classList.toggle('open');
+}
+
+function toggleSetDone(sessionId, exIdx, setIdx){
+  if(!state.completed[sessionId]) state.completed[sessionId] = {date: new Date().toISOString(), sets:{}};
+  const sess = state.completed[sessionId];
+  if(!sess.sets[exIdx]) sess.sets[exIdx] = [];
+  while(sess.sets[exIdx].length <= setIdx) sess.sets[exIdx].push({});
+
+  // Read inputs
+  const wInput = document.querySelector(`[data-sess="${sessionId}"][data-ex="${exIdx}"][data-set="${setIdx}"][data-field="w"]`);
+  const rInput = document.querySelector(`[data-sess="${sessionId}"][data-ex="${exIdx}"][data-set="${setIdx}"][data-field="r"]`);
+  if(wInput) sess.sets[exIdx][setIdx].w = wInput.value;
+  if(rInput) sess.sets[exIdx][setIdx].r = rInput.value;
+  sess.sets[exIdx][setIdx].done = !sess.sets[exIdx][setIdx].done;
+
+  save();
+  renderTodaySession();
+  // Re-open the expanded section
+  setTimeout(() => {
+    const logger = document.getElementById(`logger-${sessionId}-${exIdx}`);
+    if(logger) logger.classList.add('open');
+  }, 0);
+}
+
+function toggleSessionComplete(sessionId){
+  if(state.completed[sessionId]){
+    delete state.completed[sessionId];
+  } else {
+    if(!state.completed[sessionId]) state.completed[sessionId] = {date: new Date().toISOString(), sets:{}};
+    state.completed[sessionId].date = new Date().toISOString();
+    // Capture any in-flight inputs
+    document.querySelectorAll('.set-input').forEach(inp => {
+      const ses = inp.dataset.sess;
+      if(ses !== sessionId) return;
+      const ex = inp.dataset.ex, st = inp.dataset.set, field = inp.dataset.field;
+      if(!state.completed[sessionId].sets[ex]) state.completed[sessionId].sets[ex] = [];
+      while(state.completed[sessionId].sets[ex].length <= parseInt(st)) state.completed[sessionId].sets[ex].push({});
+      state.completed[sessionId].sets[ex][parseInt(st)][field] = inp.value;
+    });
+  }
+  save();
+  renderHeader();
+  renderWeekGrid();
+  renderTodaySession();
+}
+
+function openSessionModal(week, dayType){
+  const phase = week <= 4 ? "1" : week <= 8 ? "2" : "3";
+  const session = SESSIONS[phase][dayType];
+  const sessionId = getSessionId(week, dayType);
+  const done = isSessionDone(week, dayType);
+  const completedData = state.completed[sessionId];
+
+  document.getElementById('modal-content').innerHTML = `
+    <h2>Week ${week} · ${session.title}</h2>
+    <p style="margin-bottom:16px">${session.sub} · ${done ? '<span style="color:var(--green)">Completed</span>' : 'Not yet logged'}</p>
+    ${session.exercises.map((ex, idx) => renderExerciseRow(ex, idx, sessionId, completedData)).join('')}
+    <button class="complete-btn ${done ? 'done' : ''}" onclick="toggleSessionComplete('${sessionId}'); closeModal();">${done ? 'Mark incomplete' : 'Mark complete'}</button>
+  `;
+  document.getElementById('session-modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('session-modal').classList.remove('open');
+}
+
+function hideSetup(){
+  state.setupShown = false;
+  document.getElementById('setup').classList.add('hide');
+  save();
+}
+
+// Capture set inputs as user types
+document.addEventListener('input', e => {
+  if(!e.target.classList.contains('set-input')) return;
+  const sessionId = e.target.dataset.sess;
+  const exIdx = e.target.dataset.ex;
+  const setIdx = parseInt(e.target.dataset.set);
+  const field = e.target.dataset.field;
+  if(!state.completed[sessionId]) state.completed[sessionId] = {date: new Date().toISOString(), sets:{}};
+  if(!state.completed[sessionId].sets[exIdx]) state.completed[sessionId].sets[exIdx] = [];
+  while(state.completed[sessionId].sets[exIdx].length <= setIdx) state.completed[sessionId].sets[exIdx].push({});
+  state.completed[sessionId].sets[exIdx][setIdx][field] = e.target.value;
+  save();
+});
+
+// Tab switching
+document.querySelectorAll('.nav-btn').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('view-' + b.dataset.view).classList.add('active');
+    if(b.dataset.view === 'plan'){ renderPlanSessions(); renderPlanMacros(); renderPlanMeals(); }
+    if(b.dataset.view === 'progress'){ renderProgress(); }
+  };
+});
+
+// Phase pills (in plan view)
+document.querySelectorAll('#phase-pills .pill').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('#phase-pills .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    state.currentPhase = p.dataset.phase;
+    save();
+    renderPlanSessions(); renderPlanMacros(); renderPlanMeals();
+  };
+});
+
+// Click outside modal to close
+document.getElementById('session-modal').onclick = e => {
+  if(e.target.id === 'session-modal') closeModal();
+};
+
+// Hide setup banner if dismissed
+if(!state.setupShown) document.getElementById('setup').classList.add('hide');
+
+// Initial render
+renderHeader();
+renderWeekGrid();
+renderTodaySession();
+</script>
+</body>
+</html>
